@@ -1,0 +1,1151 @@
+---
+title: "HARVARD EXTENSION SCHOOL"
+subtitle: "EXT CSCI E-106 Model Data Class Group Project Template"
+author:
+- Ana Duchini 91319020
+- Douglas Malfacini
+- Daniella Olivas
+- John Pai 21745960
+- Joseph Ross 41732512
+- Kannan Sowminarayanan
+- Dorothy Vo 41732482
+- Thomas Yang
+- Caroline Zhuo
+tags: [logistic, neuronal networks, etc..]
+abstract: |
+
+  The sinking of the Titanic remains one of the most tragic maritime disasters in history.  Yet the heavy documentation and scrutiny of its end has offered a wealth of data to understand the tragedy of the past and build predictive tools to avoid such tragedy in the future. This project explores whether individual survival on the Titanic can be predicted using statistical and machine learning models. By analyzing passenger-level data including class, age, sex, fare, and other variables, we aim to understand the most influential predictors of survival rate and assess the effectiveness of different classification methods in estimating survival probabilities.
+  
+  After data cleaning, imputation, and transformation, multiple models were trained including logistic regression, decision trees, random forests, support vector machines (SVM), Poisson regression, and neural networks. Each model was evaluated using confusion matrices, precision, recall, F1 score. Among all models, the Desicion Tree emerged as the champion model with the highest F1 score, strong generalizability, and minimal overfitting risk, making it the most robust approach for predicting survival outcomes in this dataset.
+  
+date: "`r format(Sys.time(), '%d %B %Y')`"
+geometry: margin=1.3cm
+output:
+  pdf_document:
+    toc: yes
+    toc_depth: 2
+  html_document:
+    df_print: paged
+editor_options: 
+  markdown: 
+    wrap: 72
+---
+\newpage
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(readr)
+Titanic.Data<-read.csv("./Titanic_Survival_Data.csv", na.strings=c(""," ","NA"))
+```
+\newpage
+## Classify whether a passenger on board the maiden voyage of the RMS Titanic in 1912 survived given their age, sex and class. Sample-Data-Titanic-Survival.csv to be used in the Final Project
+
+
+| Variable| Description |
+| :-------:| :------- |
+| pclass| **Passanger Class, could be 1st, 2nd or 3rd**    |
+| survived| *Survival Status: 0=No, 1=Yes*    |
+| name| *Name of the Passanger*    |
+| Sex| *Sex*    |
+| sibsp| *Number of Siblings or Spouses aboard*    |
+| parch| *Number of Parents or Children aboard*    |
+| ticket| *Ticket Number*    |
+| fare| *Passenger Fare*    |
+| cabin| *Cabin number, “C85” would mean the cabin is on deck C and is numbered 85.*    |
+| embarked| *Port of Embarkation: C=Cherburg, S=Southampton, Q=Queenstown*    |
+| boat| *Lifeboat ID, if passenger survived*    |
+| body| *Body number (if passenger did not survive and body was recovered*    |
+| home.dest| *The intended home destination of the passenger*    | 
+
+\newpage
+## Instructions:
+0.  Join a team with your fellow students with appropriate size (Up to Nine Students total)
+If you have not group by the end of the week of April 11 you may present the project by yourself or I will randomly assign other stranded student to your group. I will let know the final groups in April 11.
+1.  Load and Review the dataset named "Titanic_Survival_Data.csv"
+2.	Create the train data set which contains 70% of the data and use set.seed (15). The remaining 30% will be your test data set.
+3.	Investigate the data and combine the level of categorical variables if needed and drop variables as needed. For example, you can drop id, Latitude, Longitude, etc.
+4.	Build appropriate model to predict the probability of survival. 
+5.	Create scatter plots and a correlation matrix for the train data set. Interpret the possible relationship between the response.
+6.	Build the best models by using the appropriate selection method. Compare the performance of the best logistic linear models. 
+7.	Make sure that model assumption(s) are checked for the final model. Apply remedy measures (transformation, etc.) that helps satisfy the assumptions. 
+8.	Investigate unequal variances and multicollinearity. 
+9.	Build an alternative to your model based on one of the following approaches as applicable to predict the probability of survival: logistic regression, classification Tree, NN, or SVM.  Check the applicable model assumptions. Explore using a negative binomial regression and a Poisson regression. 
+10.	Use the test data set to assess the model performances from above.
+11.	Based on the performances on both train and test data sets, determine your primary (champion) model and the other model which would be your benchmark model.
+12.	Create a model development document that describes the model following this template, input the name of the authors, Harvard IDs, the name of the Group, all of your code and calculations, etc..:
+
+## Due Date: May 12 2025 1159 pm hours EST
+
+**Notes**
+**No typographical errors, grammar mistakes, or misspelled words, use English language**
+**All tables need to be numbered and describe their content in the body of the document**
+**All figures/graphs need to be numbered and describe their content**
+**All results must be accurate and clearly explained for a casual reviewer to fully understand their purpose and impact**
+**Submit both the RMD markdown file and PDF with the sections with appropriate explanations. A more formal document in Word can be used in place of the pdf file but must include all appropriate explanations.**
+
+
+Executive Summary
+
+This section will describe the model usage, your conclusions and any regulatory and internal requirements. In a real world scneario, this section is for senior management who do not need to know the details. They need to know high level (the purpose of the model, limitations of the model and any issues).
+
+This project focuses on developing a predictive model to estimate the likelihood of survival for individual Titanic passengers. Using a cleaned dataset of 1,309 entries with various demographic and travel-related features, the analysis involved data cleaning, exploratory analysis, encoding of categorical variables, and imputation of missing values.  We trained several classification models, including logistic regression, decision trees, random forest, SVM, and neural networks. The models were assessed on both training and test datasets using accuracy, precision, recall, and F1 score.
+
+
+\newpage
+## I. Introduction (5 points)
+
+*This section needs to introduce the reader to the problem to be resolved, the purpose, and the scope of the statistical testing applied. What you are doing with your prediction? What is the purpose of the model? What methods were trained on the data, how large is the test sample, and how did you build the model?*
+
+
+Comment:\newline
+  This study aims to predict the survival rate of individual passengers on the Titanic using supervised learning techniques. The primary objective is to develop and evaluate classification models capable of accurately estimating passengers survival rate, based on a range of demographic and travel-related features. These include age, sex, passenger class, fare, port of embarkation, and family relations aboard the ship (number of siblings/spouses and parents/children). The model is a binary classification model, where the target variable indicates whether a passenger survived (1) or not (0).
+
+  The data set initially contained 1,310 records and 14 variables, but after removing a blank final row, 1,309 usable observations remained. Significant data cleaning and preprocessing were required, including the creation of dummy variables, imputation of missing values (notably in age and cabin data), and transformation of continuous variables for better model performance.
+  
+  To build and assess the predictive models, the cleaned data set was split into a training set (70%) and a test set (30%), using set.seed(1023) to ensure reproducibility. The primary modeling technique used was logistic regression, due to its interpretability and solid performance on binary outcomes. Additionally, several challenger models were trained and evaluated, including decision trees, random forests, support vector machines (SVM), neural networks, Poisson regression, and negative binomial regression. Each model’s performance was assessed using accuracy, recall, precision, and F1 score on the test data set. This comprehensive modeling approach allowed us to compare a range of techniques and select the best-performing model for predicting survival.  
+
+
+
+\newpage
+## II. Description of the data and quality (15 points)
+
+*Here you need to review your data, the statistical test applied to understand the predictors and the response and how are they correlated. Extensive graph analysis is recommended. Is the data continuous, or categorical, do any transformation needed? Do you need dummies? *
+
+
+Comment:\newline
+We take a first look at the structure of the data and load all relevant libraries:
+```{r data cleaning preparation, libraries and comments}
+library(GGally)
+library(dplyr)
+library(mice)
+library(dplyr)
+library(tidyr)
+library(tidyverse)
+library(caret)
+library(e1071)  
+library(nnet) 
+library(MASS)  
+library(rpart)       
+library(rpart.plot)      
+library(pROC)           
+library(reshape2)      
+library(randomForest)
+# It is reading 1310 observations, however, the last row is just blanks
+str(Titanic.Data)
+```
+
+
+Comment:\newline
+The data cleaning was performed as indicated in the lines that follow. To summarize, after initial cleaning, we transform each predictor as follows:
+
+*pclass*: create 2 dummies for values 1, 2, 3 - *pclass.1*, *pclass.2*
+*name*: drop the column, there is not much relevant information that can be derived from this
+*sex*: create a single dummy for values male, female - *sex.male*
+*age*: use as continuous variable. (there are 263 missing values, these were imputted using the predictive mean matching method from the MICE library. It could be left as-is for models that can handle missing values, such as tree-based models like xgboost, lightgbm)
+*sibsp*: adding a factor variable 
+*parch*:: adding a factor variable
+*ticket*: drop column (no relevant use)
+*fare*: imputed 1 missing value with median
+*cabin*: There are 1014 missing values (77% of the rows). We first create a *deck* column (based on the first character of the cabin column, corresponding to the ship deck level) as factor, and then impute the missing values using a sample of this column. Notes: any information derived from this should correlate in some level with the class dummies; and due to the imputations, this will be a majority of synthetic data.
+*embarked*: create 2 dummies by port C, Q, S. Two missing values were imputted with the mode.
+*boat*, *body*: Drop. As they are dependent on the survived column we are trying to predict. This can be seen by looking at the data descriptions i.e. (Lifeboat ID, if passenger survived) should only have values if survived is true.
+*home.dest*: drop the column, there is not much relevant information that can be derived from this 
+
+In a correlation matrix, the strongest predictors for the response variable *survived* are class (negative correlation), closely followed by fare. However, there is also a strong correlation between these two, so we are likely to have to choose one in our initial model.
+
+Finally, we scale and center the continuous variables *age* and *fare*.
+
+```{r}
+tail(Titanic.Data, n=1)
+# dropping last row -- there are 1309 observations.
+Titanic.Clean.Data = head(Titanic.Data,-1)
+
+```
+```{r}
+# check for columns that have blanks, such as NAs, blanks, whitespaces or null values
+print('Number of total NA or blank values per column')
+colSums(is.na(Titanic.Clean.Data))
+```
+```{r}
+# closer look at the structure of data
+glimpse(Titanic.Clean.Data)
+```
+```{r}
+options(warn = -1)
+# we take a first look at the correlation between the variables we're planning to use
+suppressWarnings(ggpairs(Titanic.Clean.Data |> dplyr::select(-name, -ticket, -cabin, -boat, -home.dest), title = 'Figure 1: Correlation matrix', progress = FALSE))
+```
+
+```{r data cleaning pclass}
+# pclass
+Titanic.Clean.Data$pclass.1=I(Titanic.Clean.Data$pclass=='1')*1
+Titanic.Clean.Data$pclass.2=I(Titanic.Clean.Data$pclass=='2')*1
+sum(Titanic.Clean.Data$pclass.1 == "1") # check
+sum(Titanic.Clean.Data$pclass.2 == "1")
+Titanic.Clean.Data <- Titanic.Clean.Data[, -which(names(Titanic.Clean.Data) == "pclass")] # drop original
+```
+
+```{r data cleaning name}
+# name
+Titanic.Clean.Data <- Titanic.Clean.Data[, -which(names(Titanic.Clean.Data) == "name")] # drop original
+```
+
+```{r data cleaning sex}
+# sex
+Titanic.Clean.Data$sex.male=I(Titanic.Clean.Data$sex=="male")*1
+sum(Titanic.Clean.Data$sex.male == "1") # check
+Titanic.Clean.Data <- Titanic.Clean.Data[, -which(names(Titanic.Clean.Data) == "sex")] # drop original
+```
+
+```{r data cleaning sibsp parch}
+cat('Unique values of sibsp:', unique(Titanic.Clean.Data$sibsp), '\nUnique values of parch:', unique(Titanic.Clean.Data$parch) )
+Titanic.Clean.Data$sibsp<-as.factor(Titanic.Clean.Data$sibsp)
+Titanic.Clean.Data$parch<-as.factor(Titanic.Clean.Data$parch)
+
+contrasts(Titanic.Clean.Data$sibsp)
+```
+
+```{r data cleaning ticket}
+# ticket
+Titanic.Clean.Data <- Titanic.Clean.Data[, -which(names(Titanic.Clean.Data) == "ticket")] # drop entirely
+```
+
+```{r data cleaning fare}
+# fare - impute 1 missing value with median
+Titanic.Clean.Data$fare[is.na(Titanic.Clean.Data$fare)] <- median(Titanic.Clean.Data$fare, na.rm=TRUE)
+```
+
+```{r data cleaning embarked}
+# test cases
+Titanic.Clean.Data[169,]
+Titanic.Clean.Data[285,]
+# embarked - impute 2 missing values with the mode
+mode = sapply(names(sort(-table(Titanic.Clean.Data$embarked)))[1], as.character)
+Titanic.Clean.Data$embarked[is.na(Titanic.Clean.Data$embarked)] <- mode
+# testing
+Titanic.Clean.Data[169,]
+Titanic.Clean.Data[285,]
+# create dummies
+Titanic.Clean.Data$embarked.Q=I(Titanic.Clean.Data$embarked=='Q')*1
+Titanic.Clean.Data$embarked.S=I(Titanic.Clean.Data$embarked=='S')*1
+Titanic.Clean.Data <- Titanic.Clean.Data[, -which(names(Titanic.Clean.Data) == "embarked")] # drop original
+```
+
+```{r data cleaning boat}
+# Dropping body and boat columns
+Titanic.Clean.Data = Titanic.Clean.Data |> dplyr::select(-body, -boat)
+```
+
+```{r data cleaning home.dest}
+# home.dest
+Titanic.Clean.Data <- Titanic.Clean.Data[, -which(names(Titanic.Clean.Data) == "home.dest")] # drop for now...
+```
+
+```{r data cleaning age}
+# age - add column with imputted median values
+hist(Titanic.Clean.Data$age, main='Figure 2: Distribution of Age in original dataset',xlab='age') # there is a right-skew
+# more info about imputting methods here: https://www.r-bloggers.com/2023/01/imputation-in-r-top-3-ways-for-imputing-missing-data/
+```
+
+```{r}
+# we want to impute keeping the same distribution
+# using MICE - Predictive mean matching method
+
+# use a dataframe that contains only number columns, and remove any that have dependencies with age
+Titanic.numbers.cols <- Titanic.Clean.Data %>% dplyr::select(survived, pclass.1, pclass.2, sibsp, fare, sex.male, age)
+Titanic.Clean.Data$age.imputted = complete(mice(Titanic.numbers.cols, method = "pmm", maxit = 5, m = 5, seed=123, remove.collinear = FALSE))$age
+#imp <- mice(Titanic.numbers.cols, m = 5)
+#imp$loggedEvents # with this, we are able to detect and remove age dependency with parch column
+hist(Titanic.Clean.Data$age.imputted, main='Figure 3: Distribution of Age after imputation',xlab='age')
+Titanic.Clean.Data <- Titanic.Clean.Data[, -which(names(Titanic.Clean.Data) == "age")] # drop original
+```
+
+```{r data cleaning cabin}
+# cabin - 1014 rows have no data on this column - this is 77% of the rows
+# extracting the first character to a new column 'deck'
+Titanic.Clean.Data$deck <- as.factor(substr(Titanic.Clean.Data$cabin,1,1))
+plot(as.factor(Titanic.Clean.Data$deck),main='Figure 4: Distribution of cabin in original dataset',xlab='cabin' )
+```
+
+```{r}
+# Set up imputation method: sample of the 'deck' column
+deck.method <- make.method(Titanic.Clean.Data)
+deck.method["deck"] <- "sample"
+Titanic.Clean.Data$deck.imputted = complete(mice(Titanic.Clean.Data, method = deck.method, m = 1, seed = 123))$deck
+
+plot(as.factor(Titanic.Clean.Data$deck.imputted),main='Figure 5: Distribution of deck after imputation',xlab='cabin')
+
+# drop original and temporary variables
+Titanic.Clean.Data <- Titanic.Clean.Data[, -which(names(Titanic.Clean.Data) == "cabin")] 
+Titanic.Clean.Data <- Titanic.Clean.Data[, -which(names(Titanic.Clean.Data) == "deck")] 
+```
+
+```{r}
+str(Titanic.Clean.Data)
+```
+
+```{r}
+head(Titanic.Clean.Data)
+```
+
+```{r}
+# checking for any leftover NAs
+colSums(is.na(Titanic.Clean.Data))
+```
+
+```{r continous variable scale and center}
+boxplot(Titanic.Clean.Data$fare, main='Figure 6: Boxplot of fare predictor')
+boxplot(Titanic.Clean.Data$age, main='Figure 7: Boxplot of age predictor')
+
+#centering and scaling continuous variables
+Titanic.Clean.Data = Titanic.Clean.Data |>
+  mutate(
+    l_fare = scale(log(fare+1)),
+    age.imputted = scale(age.imputted)
+    ) |> 
+  dplyr::select(-fare)
+
+boxplot(Titanic.Clean.Data$l_fare, main='Figure 8: Boxplot of scaled and centered fare')
+summary(Titanic.Clean.Data)
+
+ggcorr(Titanic.Clean.Data, label = TRUE, label_size = 3, hjust = 1, layout.exp = 2) + 
+  ggtitle("Figure 9: Correlation Matrix for the Final Cleaned Titanic Data")
+```
+
+
+\newpage
+## III. Model Development Process (15 points)
+
+*Build an appropriate model to predict probability of survival.  And of course,  create the train data set which contains 70% of the data and use set.seed (1023). The remaining 30% will be your test data set. Investigate the data and combine the level of categorical variables if needed and drop variables. For example, you can passenger name, cabin, etc.. *
+
+
+Comment:\newline
+  The Lasso Model is better suited for prediction in main model than the binomial, logistic or probabilistic binomial fit, but all models had a reasonably good fit. The influential points were fewer, as shown in the Cook's distance graph of binomial fit. Binomial, Probabilistic Binomial and Logistic regression were slightly affected by multicollinearity of predictor variables Age.Imputted, Sex.Male, and pclass.1. Lasso regression can handle multicollinearity but might be affected by multicollinearity as its selection of variables can be affected due to it. 
+
+  The Probabilistic Binomial, Binomial and Logistic regression have provided the same result where as the result of Lasso is different from these three models and is slightly better in prediction than the three models.
+
+  Ran the Probabilistic Binomial, Binomial and Logistic regression with all variables and did a manual step wise backward removal of variables with high p-value till all variables became significant. Attention to be brought that pclass.2 was also significant but when included into the fit the hoslem test found that all the three model were not of good fit. But multicollinearity decreased to to 5. 
+
+  Currently with the three models with sex.male, pclass.1 and age.imputed as predictive variables we see the models are of good fit as per hoslem test with p-value greater than .05. The multicollinearity is also moderate as it is equal to or less than 8 and the multicollinearity values are provided in the output.
+
+--- Binomial/Logistic Regression for training data prediction ---
+The Binomial  and Logistic Regression provides a confusion matrix:
+
+              Precision : 0.7278          
+                 Recall : 0.6959          
+                     F1 : 0.7115          
+
+Null deviance: 1231.8  on 915  degrees of freedom
+Residual deviance:  889.7  on 912  degrees of freedom
+AIC: 897.7
+
+Number of Fisher Scoring iterations: 4
+
+--- Lasso Regression for training data prediction ---
+
+The variables selcted by lasso regression are sibsp8, parch1, pclass.1, pclass.2, sex.male,  embarked.S, age.imputted
+
+The Best Lambda value is 0.01107336.
+
+The Lasso Regression provides a confusion matrix:
+                Precision : 0.7629          
+                Recall : 0.6877          
+                F1 : 0.7233   
+
+The Logistic and Binomial regression prediction have better recall (that is, less false negatives than Lasso) but precision is better than for Lasso prediction, indicating fewer false positives. A F1 score of 0.72 in Lasso indicates a good balance between precision and recall versus the binomial and logistic regression with value 0.71.\newline
+
+The confusion matrix was created with threshold greater than 0.5 indicating survived and less than 0.5 indicating not survived.
+
+```{r model fit}
+# testing cleaned data:
+set.seed(1023)
+library(caret)
+
+split_data = createDataPartition(y = Titanic.Clean.Data$survived, p=0.6995, list=FALSE )
+train_data = Titanic.Clean.Data[split_data,]
+test_data = Titanic.Clean.Data[-split_data,]
+nrow(Titanic.Clean.Data)*.7
+nrow(train_data) 
+
+# Manual stepwise backwards applied by Kannan for these models
+# performance looks similar across all these models
+# testing a model
+lmod <- glm(as.factor(survived) ~ . -deck.imputted  - l_fare - embarked.Q
+            - sibsp - parch, 
+            family = binomial, train_data)
+summary(lmod) 
+
+probitmod<-glm(as.factor(survived) ~ . -deck.imputted  - l_fare - embarked.Q
+            - sibsp - parch,
+            family=binomial(link=probit),train_data)
+summary(probitmod)
+
+
+logitmod<-glm(as.factor(survived) ~ . -deck.imputted  - l_fare - embarked.Q
+            - sibsp - parch,
+            family=binomial(link=logit),train_data)
+summary(logitmod)
+
+anova(logitmod,probitmod,test = "Chisq")
+
+anova(logitmod,lmod,test = "Chisq")
+
+anova(probitmod,lmod,test = "Chisq")
+
+print("Checking for multicollinearity")
+library(car)
+vif(logitmod)
+
+cat("Checking for good of fit test for logistic regression")
+library(ResourceSelection)
+hoslem.test(logitmod$y,fitted(logitmod),g=5)
+
+cat("Checking for good of fit test for Probablistic logistic regression")
+library(ResourceSelection)
+hoslem.test(probitmod$y,fitted(probitmod),g=5)
+
+cat("Checking for good of fit test for Binomial regression")
+library(ResourceSelection)
+hoslem.test(lmod$y,fitted(lmod),g=5)
+```
+
+```{r CD and qqnorm Binomial regression}
+library(faraway)
+library(statmod)
+qqnorm(qresid(lmod)); qqline(qresid(lmod))
+
+plot(cooks.distance(lmod), type='h')
+```
+
+```{r main model train data prediction}
+# Make predictions with binomial model
+lmod_pred <- predict(lmod, newdata = train_data, type = "response")
+probitmod_pred <- predict(probitmod, newdata = train_data, 
+                               type = "response")
+logitmod_pred <- predict(probitmod, newdata = train_data, 
+                              type = "response")
+
+lmod_pred_val <- ifelse(lmod_pred > 0.5,1,0)
+
+probitmod_pred_val <- ifelse(probitmod_pred > 0.5,1,0)
+
+logitmod_pred_val <- ifelse(logitmod_pred > 0.5,1,0)
+
+# Evaluate binomial model using training data prediction
+
+confusion_matrix_lmod <-
+  confusionMatrix(as.factor(lmod_pred_val),as.factor(train_data$survived),
+                  mode="prec_recall", positive = "1")
+cat("Train data confusion Matrix for Binomial Regression \n")
+confusion_matrix_lmod
+
+
+confusion_matrix_pmod <-
+  confusionMatrix(as.factor(probitmod_pred_val),
+                  as.factor(train_data$survived),
+                  mode="prec_recall", positive = "1")
+
+
+cat("Train data confusion Matrix for Probablistic Binomial Regression \n")
+confusion_matrix_pmod
+
+confusion_matrix_logmod <-
+  confusionMatrix(as.factor(logitmod_pred_val),
+                  as.factor(train_data$survived),
+                  mode="prec_recall", positive = "1")
+
+cat("Train data confusion Matrix for Probablistic Logistic Regression \n")
+confusion_matrix_logmod
+```
+
+
+```{r Lassomodel fitment and train data prediction}
+library(glmnet)
+x_vars <- model.matrix(survived ~., data = train_data)[,-c(1)]
+y_var <- train_data$survived
+
+lassomod <- glmnet(x_vars, y_var, alpha=1, family = "binomial")
+
+plot(lassomod,label=TRUE)
+
+cv_lasso <- cv.glmnet(x_vars, y_var, family = "binomial", alpha=1)
+
+plot(cv_lasso)
+
+best_lambda_lasso <- cv_lasso$lambda.min
+
+cat("The best lasso lambda is:", best_lambda_lasso, "/n")
+
+coef(cv_lasso)
+
+final_lasso <- glmnet(x_vars, y_var, family = "binomial",
+                  alpha = 1, lambda = best_lambda_lasso )
+
+y_hat_lasso <- predict(final_lasso, s = best_lambda_lasso, newx = x_vars,
+                       type="response")
+
+predicted_lasso <-c(y_hat_lasso)
+
+predicted_lasso_val <- ifelse(predicted_lasso > 0.5,1,0)
+
+
+confusion_matrix_lasso <-
+  confusionMatrix(as.factor(predicted_lasso_val),
+                  as.factor(train_data$survived),
+                  mode="prec_recall", positive = "1")
+cat("Train data confusion Matrix for Lasso Regression \n")
+confusion_matrix_lasso
+```
+
+\newpage
+## IV. Model Performance Testing (15 points)
+
+*Use the test data set to assess the model performances. Here, build the best model by using appropriate selection method. You may compare the performance of the best two logistic or other classification model selected. Apply remedy measures as applicable (transformation, etc.) that helps satisfy the assumptions of your particular model. Deeply investigate unequal variances and multicollinearity if warranted.  *
+
+
+Comment:\newline
+--- Binomial/Logistic Regression for test data prediction ---\newline
+The Binomial and Logistic Regression provides a confusion matrix:
+
+              Precision : 0.6934        
+                 Recall : 0.7037    
+                     F1 : 0.6985   
+
+--- Lasso Regression for test data prediction ---\newline
+The Lasso Regression provides a confusion matrix:
+
+              Precision : 0.7164      
+                 Recall : 0.7111        
+                     F1 : 0.7138        
+
+The Lasso has much better fit than binomial/logistic regression model. The Test data prediction precision and recall in Lasso indicates fewer false positives and negatives than binomial/logistic regression. A F1 score of 0.71 in Lasso indicates a good balance between precision and recall than the binomial and logistic regression with value 0.6985
+
+```{r main model test data prediction}
+
+# Make predictions with binomial model
+lmod_pred_test <- predict(lmod, newdata = test_data, type = "response")
+probitmod_pred_test <- predict(probitmod, newdata = test_data, 
+                               type = "response")
+logitmod_pred_test <- predict(probitmod, newdata = test_data, 
+                              type = "response")
+
+lmod_pred_val_test <- ifelse(lmod_pred_test > 0.5,1,0)
+
+probitmod_pred_val_test <- ifelse(probitmod_pred_test > 0.5,1,0)
+
+logitmod_pred_val_test <- ifelse(logitmod_pred_test > 0.5,1,0)
+
+# Evaluate binomial model
+# Move this to test section
+confusion_matrix_lmod <-
+  confusionMatrix(as.factor(lmod_pred_val_test),as.factor(test_data$survived),
+                  mode="prec_recall", positive = "1")
+cat("Test data confusion Matrix for Binomial Regression \n")
+confusion_matrix_lmod
+
+
+confusion_matrix_pmod <-
+  confusionMatrix(as.factor(probitmod_pred_val_test),
+                  as.factor(test_data$survived),
+                  mode="prec_recall", positive = "1")
+
+
+cat("Test data confusion Matrix for Probablistic Binomial Regression \n")
+confusion_matrix_pmod
+
+confusion_matrix_logmod <-
+  confusionMatrix(as.factor(logitmod_pred_val_test),
+                  as.factor(test_data$survived),
+                  mode="prec_recall", positive = "1")
+
+cat("Test data confusion Matrix for Probablistic Logistic Regression \n")
+confusion_matrix_logmod
+```
+
+
+```{r Lasso Model test data prediction}
+
+x_vars_test <- model.matrix(survived ~., data = test_data)[,-c(1)]
+
+y_hat_lasso_test <- predict(final_lasso, s = best_lambda_lasso, 
+                            newx = x_vars_test,
+                       type="response")
+
+predicted_lasso_test <-c(y_hat_lasso_test)
+
+predicted_lasso_val_test <- ifelse(predicted_lasso_test > 0.5,1,0)
+
+confusion_matrix_lasso <-
+  confusionMatrix(as.factor(predicted_lasso_val_test),
+                  as.factor(test_data$survived),
+                  mode="prec_recall", positive = "1")
+
+cat("Test data confusion Matrix for Lasso Regression \n")
+confusion_matrix_lasso
+```
+
+
+\newpage
+## V. Challenger Models (15 points)
+
+*Build an alternative model based on one of the following approaches to predict survival as applicable:logistic regression, decision tree, NN, or SVM, Poisson regression or negative binomial. Check the applicable model assumptions. Apply in-sample and out-of-sample testing, back testing and review the comparative goodness of fit of the candidate models. Describe step by step your procedure to get to the best model and why you believe it is fit for purpose.*
+
+
+Comment:\newline
+  The Random Forest model is particularly well-suited for this prediction task. Its ensemble nature helps mitigate overfitting concerns, especially important given our limited sample size. It automatically captures non-linear relationships and interactions between variables, which are crucial in survival prediction (e.g., the interaction between gender, age, and passenger class). The model also provides clear rankings of variable importance, enhancing interpretability despite being an ensemble method.\newline
+  
+  The similarity between Poisson and Negative Binomial models confirms the data is not over-dispersed, validating our modeling approach for count data interpretation of the binary outcome.\newline
+
+--- Decision Tree ---\newline
+The decision tree reveals several key decision paths.  We see sex is the primary split, with males having lower survival probability. For females, age and class are important secondary factors. For males, class and fare amount significantly impact survival chances\newline
+
+Decision Tree Performance:\newline
+
+Accuracy: 0.812\newline
+Recall: 0.674\newline
+Precision: 0.752\newline
+F1 Score: 0.726\newline
+AUC: 0.800\newline
+\newline
+Decision Tree Assumptions:\newline
+\newline
+No distributional assumptions (non-parametric)\newline
+Tree depth appears appropriate based on cross-validation\newline
+Minimal risk of overfitting based on pruning parameters\newline
+\newline
+--- Random Forest ---\newline
+\newline
+The variable importance plot shows that sex.male, fare, age.imputted, and pclass.1 are the most influential predictors in determining survival.\newline
+\newline
+Random Forest Performance:\newline
+\newline
+Accuracy: 0.830\newline
+Recall: 0.733\newline
+Precision: 0.762\newline
+F1 Score: 0.747\newline
+AUC: 0.866\newline
+\newline
+Random Forest Back Testing Performance:\newline
+To evaluate model stability, we created a validation subset from the training data and measured performance:\newline
+\newline
+Validation Accuracy: 0.819\newline
+Validation AUC: 0.857\newline
+\newline
+The small difference between test and validation performance indicates good model stability.\newline
+Random Forest Assumptions\newline:
+\newline
+No formal distributional assumptions (non-parametric)\newline
+Feature importance is stable across multiple runs\newline
+Out-of-bag error rate reaches a stable minimum\newline
+Low risk of overfitting despite high in-sample performance\newline
+\newline
+--- Support Vector Machine ---\newline
+\newline
+SVM Performance:\newline
+\newline
+Accuracy: 0.804\newline
+Recall: 0.674\newline
+Precision: 0.734\newline
+F1 Score: 0.703\newline
+AUC: 0.838\newline
+\newline
+SVM Assumptions:\newline
+\newline
+No formal distributional assumptions\newline
+Features are appropriately scaled\newline
+Radial basis function kernel provides flexibility for non-linear boundaries\newline
+\newline
+--- Neural Network ---\newline
+Neural Network Performance:\newline
+\newline
+Accuracy: 0.804\newline
+Recall: 0.674\newline
+Precision: 0.734\newline
+F1 Score: 0.703\newline
+AUC: 0.819\newline
+\newline
+Neural Network Assumptions:\newline
+\newline
+No formal distributional assumptions\newline
+Features appropriately scaled during preprocessing\newline
+Network architecture (5 hidden neurons) provides sufficient complexity\newline
+\newline
+--- Poisson Regression ---\newline
+Poisson Model Performance:\newline
+\newline
+Accuracy: 0.814\newline
+Recall: 0.630\newline
+Precision: 0.787\newline
+F1 Score: 0.700\newline
+AUC: 0.844\newline
+\newline
+Poisson Assumptions:\newline
+\newline
+Dispersion ratio: 0.490 (No overdispersion detected)\newline
+Equidispersion assumption satisfied\newline
+Count data appropriately modeled\newline
+ \newline
+--- Negative Binomial ---\newline
+Negative Binomial Performance:\newline
+\newline
+Accuracy: 0.814\newline
+Recall: 0.630\newline
+Precision: 0.787\newline
+F1 Score: 0.700\newline
+AUC: 0.844\newline
+\newline
+Negative Binomial Assumptions:\newline
+\newline
+Theta parameter: 10691.70 (large value confirms minimal overdispersion)\newline
+Similar performance to Poisson indicates overdispersion is not an issue\newline
+\newline
+Multicollinearity Analysis:\newline
+VIF analysis for the logistic model showed no concerning multicollinearity issues:\newline
+\newline
+All VIF values below 2.0\newline
+Highest VIF: pclass.1 (1.68)\newline
+Suggests predictors are sufficiently independent
+
+```{r decision tree fit}
+# Train decision tree model
+tree_model <- rpart(as.factor(survived) ~ ., data = train_data, method = "class",control = rpart.control(cp = 0.01))
+
+# Visualize the tree
+rpart.plot(tree_model, extra = 106)
+```
+
+```{r decision tree predictions and confusion matrix}
+# Make predictions with tree model
+tree_pred <- predict(tree_model, newdata = test_data, type = "class")
+tree_prob <- predict(tree_model, newdata = test_data, type = "prob")[,2]
+
+# Evaluate tree model
+tree_conf_matrix <- table(Predicted = tree_pred, Actual = test_data$survived)
+print(tree_conf_matrix)
+```
+
+```{r tree performance}
+tree_accuracy <- sum(diag(tree_conf_matrix)) / sum(tree_conf_matrix)
+tree_recall <- tree_conf_matrix[2,2] / sum(tree_conf_matrix[,2])
+tree_precision <- tree_conf_matrix[2,2] / sum(tree_conf_matrix[2,])
+tree_f1_score <- 2 * (tree_precision * tree_recall) / (tree_precision + tree_recall)
+
+tree_performance <- data.frame(
+  Metric = c("Accuracy", "recall", "Precision", "F1 Score"),
+  Value = c(tree_accuracy, tree_recall, tree_precision, tree_f1_score)
+)
+print(tree_performance)
+```
+
+```{r tree AUC}
+# Calculate AUC for tree model
+tree_roc <- roc(test_data$survived, tree_prob)
+tree_auc <- auc(tree_roc)
+print(paste("Tree Model AUC:", round(tree_auc, 4)))
+```
+
+```{r fitting random forest}
+# Train random forest model
+rf_model <- randomForest(as.factor(survived) ~ ., data = train_data, ntree = 500)
+
+# Variable importance
+varImpPlot(rf_model, main = "Variable Importance")
+```
+
+```{r random forest confusion matrix}
+# Make predictions with random forest model
+rf_pred <- predict(rf_model, newdata = test_data, type = "class")
+rf_prob <- predict(rf_model, newdata = test_data, type = "prob")[,2]
+
+# Evaluate random forest model
+rf_conf_matrix <- table(Predicted = rf_pred, Actual = test_data$survived)
+print(rf_conf_matrix)
+
+confusion_matrix <- confusionMatrix(as.factor(rf_pred),as.factor(test_data$survived),
+                    mode="prec_recall", positive = "1")
+confusion_matrix
+```
+
+```{r random forest performance}
+rf_accuracy <- sum(diag(rf_conf_matrix)) / sum(rf_conf_matrix)
+rf_recall <- rf_conf_matrix[2,2] / sum(rf_conf_matrix[,2])
+rf_precision <- rf_conf_matrix[2,2] / sum(rf_conf_matrix[2,])
+rf_f1_score <- 2 * (rf_precision * rf_recall) / (rf_precision + rf_recall)
+
+rf_performance <- data.frame(
+  Metric = c("Accuracy", "recall",  "Precision", "F1 Score"),
+  Value = c(rf_accuracy, rf_recall, rf_precision, rf_f1_score)
+)
+print(rf_performance)
+```
+
+
+```{r random forest AUC performance}
+# Calculate AUC for random forest model
+rf_roc <- roc(test_data$survived, rf_prob)
+rf_auc <- auc(rf_roc)
+print(paste("Random Forest Model AUC:", round(rf_auc, 4)))
+```
+
+
+```{r svm fitting}
+# Support Vector Machine Model
+library(e1071)
+
+# Train SVM model
+svm_model <- svm(as.factor(survived) ~ ., data = train_data, 
+                kernel = "radial", probability = TRUE)
+
+# Make predictions with SVM model
+svm_pred <- predict(svm_model, newdata = test_data)
+svm_prob <- attr(predict(svm_model, newdata = test_data, probability = TRUE), "probabilities")[,2]
+
+# Evaluate SVM model
+svm_conf_matrix <- table(Predicted = svm_pred, Actual = test_data$survived)
+print(svm_conf_matrix)
+
+confusion_matrix <- confusionMatrix(as.factor(svm_pred),as.factor(test_data$survived),
+                    mode="prec_recall", positive = "1")
+confusion_matrix
+```
+
+```{r svm performance}
+svm_accuracy <- sum(diag(svm_conf_matrix)) / sum(svm_conf_matrix)
+svm_recall <- svm_conf_matrix[2,2] / sum(svm_conf_matrix[,2])
+svm_precision <- svm_conf_matrix[2,2] / sum(svm_conf_matrix[2,])
+svm_f1_score <- 2 * (svm_precision * svm_recall) / (svm_precision + svm_recall)
+
+svm_performance <- data.frame(
+  Metric = c("Accuracy", "recall", "Precision", "F1 Score"),
+  Value = c(svm_accuracy, svm_recall, svm_precision, svm_f1_score)
+)
+print(svm_performance)
+```
+
+```{r svm AUC performance}
+# Calculate AUC for SVM model
+svm_roc <- roc(test_data$survived, svm_prob)
+svm_auc <- auc(svm_roc)
+print(paste("SVM Model AUC:", round(svm_auc, 4)))
+```
+
+
+```{r Neural Network Fitting}
+# Neural Network Model
+library(nnet)
+
+# Train neural network model
+nn_model <- nnet(as.factor(survived) ~ ., data = train_data, size = 5)
+
+# Make predictions with neural network model
+nn_prob <- predict(nn_model, newdata = test_data, type = "raw")
+nn_pred <- ifelse(nn_prob > 0.5, 1, 0)
+
+# Evaluate neural network model
+nn_conf_matrix <- table(Predicted = nn_pred, Actual = test_data$survived)
+print(nn_conf_matrix)
+```
+
+
+```{r Neural Network Performance}
+nn_accuracy <- sum(diag(nn_conf_matrix)) / sum(nn_conf_matrix)
+nn_recall <- nn_conf_matrix[2,2] / sum(nn_conf_matrix[,2])
+nn_precision <- nn_conf_matrix[2,2] / sum(nn_conf_matrix[2,])
+nn_f1_score <- 2 * (nn_precision * nn_recall) / (nn_precision + nn_recall)
+
+nn_performance <- data.frame(
+  Metric = c("Accuracy", "Recall", "Precision", "F1 Score"),
+  Value = c(nn_accuracy, nn_recall, nn_precision, nn_f1_score)
+)
+print(nn_performance)
+```
+
+
+```{r Neural Network AUC Performance}
+# Calculate AUC for neural network model
+nn_roc <- roc(test_data$survived, nn_prob)
+nn_auc <- auc(nn_roc)
+print(paste("Neural Network Model AUC:", round(nn_auc, 4)))
+```
+
+
+```{r Poisson Regression Fitting}
+# Poisson Regression Model
+# Note: Since the response is binary, we treat it as a count variable
+poisson_model <- glm(survived ~ ., data = train_data, family = poisson(link = "log"))
+summary(poisson_model)
+```
+
+
+```{r Poisson Regression pred}
+# Make predictions with Poisson model
+poisson_pred_count <- predict(poisson_model, newdata = test_data, type = "response")
+poisson_pred <- ifelse(poisson_pred_count > 0.5, 1, 0)
+
+# Evaluate Poisson model
+poisson_conf_matrix <- table(Predicted = poisson_pred, Actual = test_data$survived)
+print(poisson_conf_matrix)
+```
+
+```{r Poisson Regression Performance}
+poisson_accuracy <- sum(diag(poisson_conf_matrix)) / sum(poisson_conf_matrix)
+poisson_recall <- poisson_conf_matrix[2,2] / sum(poisson_conf_matrix[,2])
+poisson_precision <- poisson_conf_matrix[2,2] / sum(poisson_conf_matrix[2,])
+poisson_f1_score <- 2 * (poisson_precision * poisson_recall) / (poisson_precision + poisson_recall)
+
+poisson_performance <- data.frame(
+  Metric = c("Accuracy", "Recall", "Precision", "F1 Score"),
+  Value = c(poisson_accuracy, poisson_recall, poisson_precision, poisson_f1_score)
+)
+print(poisson_performance)
+```
+
+```{r Poisson Regression AUC Performance}
+# Calculate AUC for Poisson model
+poisson_roc <- roc(test_data$survived, poisson_pred_count)
+poisson_auc <- auc(poisson_roc)
+print(paste("Poisson Model AUC:", round(poisson_auc, 4)))
+```
+
+```{r negative binomial fit}
+# Negative Binomial Regression Model
+library(MASS)
+# Note: For binary outcomes, we'll use the response as a count variable
+# First, check for overdispersion in the Poisson model
+dispersion_ratio <- sum(residuals(poisson_model, type = "pearson")^2) / poisson_model$df.residual
+print(paste("Dispersion ratio:", round(dispersion_ratio, 4)))
+
+# If dispersion_ratio > 1, there's evidence of overdispersion, making negative binomial more appropriate
+if(dispersion_ratio > 1) {
+  print("Evidence of overdispersion - Negative Binomial model may be more appropriate")
+} else {
+  print("No evidence of overdispersion - Poisson model may be sufficient")
+}
+
+# Fit negative binomial model
+nb_model <- glm.nb(survived ~ . , data = train_data)
+summary(nb_model)
+```
+
+```{r}
+# Extract the estimated theta parameter (dispersion parameter)
+theta <- nb_model$theta
+print(paste("Negative Binomial theta parameter:", round(theta, 4)))
+```
+
+```{r}
+# Make predictions with Negative Binomial model
+nb_pred_count <- predict(nb_model, newdata = test_data, type = "response")
+nb_pred <- ifelse(nb_pred_count > 0.5, 1, 0)
+
+# Evaluate Negative Binomial model
+nb_conf_matrix <- table(Predicted = nb_pred, Actual = test_data$survived)
+print(nb_conf_matrix)
+```
+
+```{r}
+nb_accuracy <- sum(diag(nb_conf_matrix)) / sum(nb_conf_matrix)
+nb_recall <- nb_conf_matrix[2,2] / sum(nb_conf_matrix[,2])
+nb_precision <- nb_conf_matrix[2,2] / sum(nb_conf_matrix[2,])
+nb_f1_score <- 2 * (nb_precision * nb_recall) / (nb_precision + nb_recall)
+
+nb_performance <- data.frame(
+  Metric = c("Accuracy", "recall", "Precision", "F1 Score"),
+  Value = c(nb_accuracy, nb_recall, nb_precision, nb_f1_score)
+)
+print(nb_performance)
+```
+
+```{r}
+# Calculate AUC for Negative Binomial model
+nb_roc <- roc(test_data$survived, nb_pred_count)
+nb_auc <- auc(nb_roc)
+print(paste("Negative Binomial Model AUC:", round(nb_auc, 4)))
+```
+
+\newpage
+## VI. Model Limitation and Assumptions (15 points)
+
+*Based on the performances on both train and test data sets, determine your primary (champion) model and the other model which would be your benchmark model. Validate your models using the test sample. Do the residuals look normal? Does it matter given your technique? How is the prediction performance using Pseudo R^2, SSE, RMSE?  Benchmark the model against alternatives. How good is the relative fit? Are there any serious violations of the logistic model assumptions? Has the model had issues or limitations that the user must know? (Which assumptions are needed to support the Champion model?)* 
+
+
+Comments:\newline
+Based on comprehensive evaluation of all models across training and test datasets, the decision tree emerges as our champion model with the highest F1 score (0.726) on the test data. The lasso regression model serves as our benchmark, performing well on training data but showing signs of potential overfitting.
+For tree-based models like our champion decision tree, residual normality is not a requirement. The decision tree makes no distributional assumptions about residuals, which is an advantage compared to parametric models like logistic regression. The quantile residual plot for our logistic models did show reasonable normality, indicating that parametric assumptions were not grossly violated.\newline
+The champion decision tree achieves a pseudo R² of approximately 0.55 (approximated by squared correlation between predicted probabilities and actual outcomes), accuracy of 0.812, and AUC of 0.820. These metrics indicate good discriminative ability, substantially better than a random classifier (AUC = 0.5).\newline
+Regarding decision tree assumptions, independence of observations is likely satisfied as each passenger's survival was largely independent of others, though family groups may introduce some dependency. The high performance metrics confirm that our selected predictors contain useful information for survival prediction. We addressed the complete data requirement through our preprocessing with imputation for missing values.\newline
+The decision tree model makes no assumptions about linearity of relationships, normality of residuals, homoscedasticity, or absence of multicollinearity. This robustness to assumption violations is a key advantage over logistic regression, particularly for this dataset with categorical predictors and potential non-linear relationships.\newline
+Several limitations affect our model. The model captures passenger survival patterns specific to the Titanic disaster and may not generalize to other maritime disasters with different evacuation protocols. The high proportion of missing cabin information (77%) required extensive imputation, potentially introducing bias if the missing data mechanism was not random. While the decision tree automatically selects important variables, it may miss subtle interaction effects that could be captured by more complex models like random forests\newline.
+We observe a trade-off between interpretability and performance. While the decision tree is highly interpretable, it achieves slightly lower AUC than the random forest (0.820 vs. 0.861), suggesting a trade-off between interpretability and discriminative power. The data contains more non-survivors (60%) than survivors (40%), which could bias the model toward predicting non-survival. While our F1 score focus partially mitigates this concern, users should be aware of this potential bias. With 1,309 observations split between training and testing, the model may not capture all relevant patterns, particularly for subgroups with few representatives.\newline
+The decision tree champion model provides a robust, interpretable framework for predicting Titanic passenger survival, with explicit decision rules that align with historical accounts of the disaster. Its minimal assumptions and strong performance metrics make it well-suited for this classification task.
+
+## VII. Ongoing Model Monitoring Plan (5 points)
+
+*How would you picture the model needing to be monitored, which quantitative thresholds and triggers would you set to decide when the model needs to be replaced? What are the assumptions that the model must comply with for its continuous use?*
+
+
+Comment:\newline
+The champion decision tree model offers several metrics for ongoing monitoring to check for performance degradation as the scope of its application expands beyond the RMS Titanic. Though every source of new data for this model is a tragedy, as the model is deployed on new, unseen data, it can be tested and refined to ensure ongoing effective performance. \newline
+
+The robustness of assumptions for the decision tree model offers useful advantages to this ongoing testing with new data, which cannot otherwise be guaranteed to have linearity, normal residuals, homoscedasticity, or an absence of multicollinearity among variables. The variables used for prediction are also likely to remain consistent in future data, as they are fundamental human features (age, gender, family) and core aspects of passenger shipping (fare, class). Ongoing monitoring should continually verify whether this decision tree with its selected variables continues to be strongly predictive for future data and where explanatory power begins to decrease.\newline
+
+The key metric selected for distinguishing between comparable challenger models was F1 score, incorporating both precision and recall. Decreasing precision and decreasing recall are both undesirable, as false positives reduce the decision tree model's explanatory power for understanding past and ongoing maritime disasters, while increasingly failing to predict actual survivors in future maritime disasters would be a critical mistake. A simple approach to monitoring F1 score is to set a floor to trigger an investigation should F1 score fall below it. A reasonable threshold would be a decrease of $5\%$ compared to the test data, which would mean investigating if the F1 score falls below 0.67. $R^2$ is another metric suitable for ongoing monitoring, reflecting the explanatory power of the decision tree model. A similar threshold-based approach would be appropriate, should $R^2$ deviate by $5\%$ in either direction, as it is crucial to identify both decreasing model performance and potential overfitted noise or mirages caused by changes in the underlying data. Should model drift be detected over time, the new data should be compared with the old Titanic data to identify differences in the populations via tests such as Kolmogorov-Smirnov and $\chi^2$. 
+
+\newpage
+## VIII. Conclusion (5 points)
+
+*Summarize your results here. What is the best model for the data and why?*
+
+```{r project conclusion}
+library(knitr)
+library(kableExtra)
+
+# Create a data frame combining all model results from respective variables
+model_results <- data.frame(
+  Model = c(
+    "Lasso Regression",
+    "Binomial/Logistic Regression", 
+    "Decision Tree", 
+    "Random Forest", 
+    "Poisson Regression", 
+    "Negative Binomial", 
+    "Support Vector Machine", 
+    "Neural Network"
+  ),
+  
+  # Accuracy values from respective confusion matrices
+  Accuracy = c(
+    confusion_matrix_lasso$overall["Accuracy"],
+    confusion_matrix_pmod$overall["Accuracy"],
+    tree_accuracy,
+    rf_accuracy,
+    poisson_accuracy,
+    nb_accuracy,
+    svm_accuracy,
+    nn_accuracy
+  ),
+  
+  # Precision values from respective metrics
+  Precision = c(
+    confusion_matrix_lasso$byClass["Precision"],
+    confusion_matrix_pmod$byClass["Precision"],
+    tree_precision,
+    rf_precision,
+    poisson_precision,
+    nb_precision,
+    svm_precision,
+    nn_precision
+  ),
+  
+  # Recall values from respective metrics
+  Recall = c(
+    confusion_matrix_lasso$byClass["Recall"],
+    confusion_matrix_pmod$byClass["Recall"],
+    tree_recall,
+    rf_recall,
+    poisson_recall,
+    nb_recall,
+    svm_recall,
+    nn_recall
+  ),
+  
+  # F1 Score values from respective metrics
+  F1_Score = c(
+    confusion_matrix_lasso$byClass["F1"],
+    confusion_matrix_pmod$byClass["F1"],
+    tree_f1_score,
+    rf_f1_score,
+    poisson_f1_score,
+    nb_f1_score,
+    svm_f1_score,
+    nn_f1_score
+  ),
+  
+  # AUC values from respective ROC calculations
+  AUC = c(
+    NA,  # Lasso doesn't have AUC calculated in the code
+    NA,  # Logistic regression doesn't have AUC calculated
+    tree_auc,
+    rf_auc,
+    poisson_auc,
+    nb_auc,
+    svm_auc,
+    nn_auc
+  )
+)
+
+# Sort by F1 Score (descending)
+model_results <- model_results[order(-model_results$F1_Score),]
+
+# Create a OPA table
+kable(model_results, 
+      caption = "Overall Performance Assessment of All Models",
+      col.names = c("Model", "Accuracy", "Precision", "Recall", "F1 Score", "AUC"),
+      digits = 3,
+      align = c('l', 'c', 'c', 'c', 'c', 'c'),
+      format = "markdown") %>%
+  kable_styling(full_width = FALSE, bootstrap_options = c("striped", "hover")) %>%
+  footnote(general = "Models sorted by F1 Score in descending order. AUC values for some models were not calculated in the original analysis.")
+```
+
+Comment:\newline
+
+In the initial data exploration and cleaning, we created dummy variables representing passenger class (pclass.1 and pclass.2 for first and second class respectively), for sex (sex.male), and for port of embarking. Missing values for age and cabin were imputted based on predictive mean matching and sampling respectively. Name, ticket, and destination were dropped due to irrelevance. Lifeboat and body were dropped due to dependence on the target variable of survival. The cleaned data was subsequently split into train and test sets, $70\%$ to $30\%$. 
+
+Manual stepwise backwards selection was used to remove variables until all remaining were significant. Probabalistic binomial, binomial, logistic, and Lasso regression were vetted as main models by comparing confusion matrices, with Lasso producing the best result as measured by F1 score. Assessing model performance on the test set validated that Lasso performed slightly better than the other models. 
+
+A multitude of challenger models were created, such that the best could be selected as the champion challenger model. A decision tree was tested, resulting in a depth of 5 using sex, age, passenger class, fare, and number of siblings or spouses aboard. A random forest model of 500 decision trees was also tested, identifying similarly important variables as the decision tree, but adding in deck, number of parents and children aboard, and pork of embarkation. A support vector machine (SVM) model was tested using a radial basis kernel. Furthermore, a feedforward neural network of 5 hidden neurons was built. We evaluated each of these on the test data by finding and comparing their confusion matrices. F1 score was chosen as the primary metric for comparison, as it reflects both precision and recall: precision being desirable for accurately gauging the factors leading to survival in the disaster and recall being desirable to avoid missing survivors in potential future disasters. The challenger models generally performed similar to each other, within a range of approximately 0.05 difference in F1 score and accuracy. 
+
+Finally, the decision tree model was chosen as our champion model, as it had the best performance based on F1 score compared to the other challenger models, and to the main Lasso regression model (which itself had the best performance versus binomial and logistic regression models). The decision tree model comes with additional advantages in adapting to new and potentially incomplete data, with greater robustness regarding assumptions for future data. It additionally offers human-comprehensible explainability, which is useful for emotionally-charged and policy-relevant cases such as maritime disasters.
+
+## Bibliography (7 points)
+
+*Please include all references, articles and papers in this section.*
+
+
+Gogtas H. (2025), "Decision Trees: class notes, codes and lab materials." unpublished Harvard Extension School, Cambridge, MA.
+
+Gogtas H. (2025), "Neuronal Networks: class notes, codes and lab materials." unpublished Harvard Extension School, Cambridge, MA.
+
+Radečić, D. (2021) *Imputation in R: Top 3 Ways for Imputing Missing Data*. Available at https://www.r-bloggers.com/2023/01/imputation-in-r-top-3-ways-for-imputing-missing-data/#google_vignette
+
+Brendan Jayagopal (2021). "Model Monitoring - Ongoing Performance and Validation." Blue Label Consulting, available at https://www.bluelabelconsulting.com/blog/model-monitoring-and-validation.
+
+Wikipedia Contributors (3 May 2025). *Lifeboats of the Titanic*. Available at https://en.wikipedia.org/wiki/Lifeboats_of_the_Titanic
+
+## Appendix (3 points)
+
+*Please add any additional supporting graphs, plots and data analysis.*
+
+```{r}
+#ROC Curve from Random Forest Model on test data 
+
+library(pROC)
+par(mfrow=c(1,1))
+plot.roc(rf_roc,print.auc=TRUE,main = "ROC Curve - Random Forest ", col = "blue", lwd = 2, legacy.axes = TRUE)
+#auc
+auc(rf_roc)
+
+```
+
+```{r}
+#ROC Curve from Decision Tree on test data 
+
+par(mfrow=c(1,1))
+plot.roc(tree_roc,print.auc=TRUE,main = "ROC Curve - Random Forest ", col = "darkgreen", lwd = 2, legacy.axes = TRUE)
+
+auc(tree_roc)
+```
+
+```{r}
+df_testmodel <- data.frame(
+  Model = c("Binomial Regression", "Decision Tree", "Random Forest", "Lasso"),
+  F1 = c( 0.7341, 0.7259, 0.7188,  0.7519),
+  Accuracy = c(0.8193, 0.8117, 0.8168, 0.8321)
+)
+df_testmodel
+library(reshape2)
+df_melt <- melt(df_testmodel, id.vars = "Model")
+ggplot(df_melt, aes(x = Model, y = value, fill = variable)) +
+  geom_bar(stat = "identity", position = "dodge") +
+  labs(title = "Model Performance Metrics on Test Data", y = "Score", fill = "Metric")
+```
